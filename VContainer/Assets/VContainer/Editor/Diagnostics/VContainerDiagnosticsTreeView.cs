@@ -9,7 +9,7 @@ using VContainer.Unity;
 
 namespace VContainer.Editor.Diagnostics
 {
-    public sealed class DiagnosticsInfoTreeViewItem : TreeViewItem
+    public sealed class DiagnosticsInfoTreeViewItem : TreeViewItem<int>
     {
         public string ScopeName { get; set; }
         public DiagnosticsInfo DiagnosticsInfo { get; }
@@ -76,7 +76,7 @@ namespace VContainer.Editor.Diagnostics
         }
     }
 
-    public sealed class VContainerDiagnosticsInfoTreeView : TreeView
+    public sealed class VContainerDiagnosticsInfoTreeView : TreeView<int>
     {
         static readonly MultiColumnHeaderState.Column[] Columns =
         {
@@ -107,11 +107,11 @@ namespace VContainer.Editor.Diagnostics
         bool flatten;
 
         public VContainerDiagnosticsInfoTreeView()
-            : this(new TreeViewState(), new MultiColumnHeader(new MultiColumnHeaderState(Columns)))
+            : this(new TreeViewState<int>(), new MultiColumnHeader(new MultiColumnHeaderState(Columns)))
         {
         }
 
-        VContainerDiagnosticsInfoTreeView(TreeViewState state, MultiColumnHeader header)
+        VContainerDiagnosticsInfoTreeView(TreeViewState<int> state, MultiColumnHeader header)
             : base(state, header)
         {
             rowHeight = 20;
@@ -154,23 +154,23 @@ namespace VContainer.Editor.Diagnostics
             if (Flatten)
             {
                 var items = rootItem.children.Cast<DiagnosticsInfoTreeViewItem>();
-                rootItem.children = new List<TreeViewItem>(Sort(items, columnIndex, ascending));
+                rootItem.children = new List<TreeViewItem<int>>(Sort(items, columnIndex, ascending));
             }
             else
             {
                 foreach (var sectionHeaderItem in rootItem.children)
                 {
                     var items = sectionHeaderItem.children.Cast<DiagnosticsInfoTreeViewItem>();
-                    sectionHeaderItem.children = new List<TreeViewItem>(Sort(items, columnIndex, ascending));
+                    sectionHeaderItem.children = new List<TreeViewItem<int>>(Sort(items, columnIndex, ascending));
                 }
             }
             BuildRows(rootItem);
         }
 
-        protected override TreeViewItem BuildRoot()
+        protected override TreeViewItem<int> BuildRoot()
         {
-            var root = new TreeViewItem { depth = -1 };
-            var children = new List<TreeViewItem>();
+            var root = new TreeViewItem<int> { depth = -1 };
+            var children = new List<TreeViewItem<int>>();
 
             if (VContainerSettings.DiagnosticsEnabled)
             {
@@ -192,7 +192,7 @@ namespace VContainer.Editor.Diagnostics
                     var grouped = DiagnositcsContext.GetGroupedDiagnosticsInfos();
                     foreach (var scope in grouped)
                     {
-                        var sectionHeaderItem = new TreeViewItem(NextId(), 0, scope.Key);
+                        var sectionHeaderItem = new TreeViewItem<int>(NextId(), 0, scope.Key);
                         children.Add(sectionHeaderItem);
                         SetExpanded(sectionHeaderItem.id, true);
 
@@ -208,7 +208,7 @@ namespace VContainer.Editor.Diagnostics
             return root;
         }
 
-        protected override bool CanMultiSelect(TreeViewItem item) => false;
+        protected override bool CanMultiSelect(TreeViewItem<int> item) => false;
 
         protected override void RowGUI(RowGUIArgs args)
         {
@@ -268,7 +268,7 @@ namespace VContainer.Editor.Diagnostics
             }
         }
 
-        void AddDependencyItemsRecursive(DiagnosticsInfo info, TreeViewItem parent)
+        void AddDependencyItemsRecursive(DiagnosticsInfo info, TreeViewItem<int> parent)
         {
             var item = new DiagnosticsInfoTreeViewItem(info)
             {

@@ -8,7 +8,7 @@ using VContainer.Diagnostics;
 
 namespace VContainer.Editor.Diagnostics
 {
-    public sealed class VContainerInstanceTreeView : TreeView
+    public sealed class VContainerInstanceTreeView : TreeView<int>
     {
         static int idSeed;
         static int NextId() => ++idSeed;
@@ -24,21 +24,21 @@ namespace VContainer.Editor.Diagnostics
 
         public DiagnosticsInfo CurrentDiagnosticsInfo { get; set; }
 
-        public VContainerInstanceTreeView() : base(new TreeViewState())
+        public VContainerInstanceTreeView() : base(new TreeViewState<int>())
         {
             Reload();
         }
 
-        protected override TreeViewItem BuildRoot()
+        protected override TreeViewItem<int> BuildRoot()
         {
-            var root = new TreeViewItem(NextId(), -1, "Root");
-            var children = new List<TreeViewItem>();
+            var root = new TreeViewItem<int>(NextId(), -1, "Root");
+            var children = new List<TreeViewItem<int>>();
             if (CurrentDiagnosticsInfo is DiagnosticsInfo info)
             {
                 for (var i = 0; i < info.ResolveInfo.Instances.Count; i++)
                 {
                     var instance = info.ResolveInfo.Instances[i];
-                    var item = new TreeViewItem(NextId(), 0,
+                    var item = new TreeViewItem<int>(NextId(), 0,
                         $"({TypeNameHelper.GetTypeAlias(instance.GetType())}) {Stringify(instance)}");
                     AddProperties(instance, item);
                     children.Add(item);
@@ -50,7 +50,7 @@ namespace VContainer.Editor.Diagnostics
             return root;
         }
 
-        void AddProperties(object instance, TreeViewItem parent)
+        void AddProperties(object instance, TreeViewItem<int> parent)
         {
             if (instance == null) return;
 
@@ -72,12 +72,12 @@ namespace VContainer.Editor.Diagnostics
                     {
                         var value = prop.GetValue(instance);
                         var displayName = $"{prop.Name} = ({TypeNameHelper.GetTypeAlias(prop.PropertyType)}) {Stringify(value)}";
-                        parent.AddChild(new TreeViewItem(NextId(), parent.depth + 1, displayName));
+                        parent.AddChild(new TreeViewItem<int>(NextId(), parent.depth + 1, displayName));
                     }
                     else
                     {
                         var displayName = $"{prop.Name} = (write-only {TypeNameHelper.GetTypeAlias(prop.PropertyType)})";
-                        parent.AddChild(new TreeViewItem(NextId(), parent.depth + 1, displayName));
+                        parent.AddChild(new TreeViewItem<int>(NextId(), parent.depth + 1, displayName));
                     }
                 }
                 catch (MissingReferenceException)
@@ -101,7 +101,7 @@ namespace VContainer.Editor.Diagnostics
                 {
                     var value = field.GetValue(instance);
                     var displayName = $"{field.Name} = ({TypeNameHelper.GetTypeAlias(field.FieldType)}) {Stringify(value)}";
-                    parent.AddChild(new TreeViewItem(NextId(), parent.depth + 1, displayName));
+                    parent.AddChild(new TreeViewItem<int>(NextId(), parent.depth + 1, displayName));
                 }
                 catch (MissingReferenceException)
                 {
